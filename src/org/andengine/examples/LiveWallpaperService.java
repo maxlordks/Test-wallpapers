@@ -9,10 +9,13 @@ import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.scene.background.IBackground;
 import org.andengine.extension.ui.livewallpaper.BaseLiveWallpaperService;
 
+import android.content.SharedPreferences;
 import android.util.Log;
 
-public class LiveWallpaperService extends BaseLiveWallpaperService {
+public class LiveWallpaperService extends BaseLiveWallpaperService implements SharedPreferences.OnSharedPreferenceChangeListener {
 
+	
+	public static final String SHARED_PREFS_NAME = "livewallpapertemplatesettings"; 
 	private ScreenOrientation mScreenOrientation;
 	private static final int CAMERA_WIDTH = 512;
 	private static final int CAMERA_HEIGHT = 768;
@@ -41,6 +44,12 @@ public class LiveWallpaperService extends BaseLiveWallpaperService {
 	public void onPopulateScene(Scene pScene, OnPopulateSceneCallback pOnPopulateSceneCallback) throws Exception {
 		Log.i("AAAA", "onPopulateScene");
 		pOnPopulateSceneCallback.onPopulateSceneFinished();
+	}
+
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences arg0, String arg1) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
