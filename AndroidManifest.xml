@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.andengine.examples"
+    package="com.maxlord.wallpapers.simple"
     android:versionCode="46"
     android:versionName="1.4.6" >
 
@@ -16,21 +16,10 @@
         android:required="false" />
     <uses-feature android:name="android.software.live_wallpaper" />
 
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.BIND_WALLPAPER" />
-
     <application
         android:icon="@drawable/icon"
-        android:label="@string/app_name" >
+        android:label="@string/app_name"
+        android:permission="android.permission.BIND_WALLPAPER" >
         <service
             android:name="LiveWallpaperService"
             android:enabled="true"
@@ -44,8 +33,9 @@
                 android:name="android.service.wallpaper"
                 android:resource="@xml/wallpaper" />
         </service>
-        <activity
-            android:name="LiveWallpaperTemplateSettings"
+
+        <activity
+            android:name="LiveWallpaperSettings"
             android:exported="true"
             android:label="@string/wallpaper_settings"
             android:theme="@android:style/Theme.Light.WallpaperSettings" />

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>    
-    <string name="app_name">Live Wallpaper Template</string>
-    <string name="wallpaper_description">Live Wallpaper Template</string>
+    <string name="app_name">Live Wallpaper Simple animation</string>
+    <string name="wallpaper_description">Live Wallpaper simple image animation by maxlord</string>
     <string name="wallpaper_settings">Settings</string>
  </resources>

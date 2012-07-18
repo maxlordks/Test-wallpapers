@@ -1,10 +1,10 @@
-package org.andengine.examples;
+package com.maxlord.wallpapers.simple;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 
-public class LiveWallpaperTemplateSettings extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener
+public class LiveWallpaperSettings extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener
 {	
 	@Override
     protected void onCreate(Bundle icicle)

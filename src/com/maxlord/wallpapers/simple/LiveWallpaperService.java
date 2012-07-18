@@ -1,4 +1,4 @@
-package org.andengine.examples;
+package com.maxlord.wallpapers.simple;
 
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.options.EngineOptions;
@@ -13,9 +13,9 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 public class LiveWallpaperService extends BaseLiveWallpaperService implements SharedPreferences.OnSharedPreferenceChangeListener {
-
+	private final String TAG = "LiveWallpaperService";
 	
-	public static final String SHARED_PREFS_NAME = "livewallpapertemplatesettings"; 
+	public static final String SHARED_PREFS_NAME = "LiveWallpaperPreferences"; 
 	private ScreenOrientation mScreenOrientation;
 	private static final int CAMERA_WIDTH = 512;
 	private static final int CAMERA_HEIGHT = 768;
@@ -27,14 +27,14 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements Sh
 
 	@Override
 	public void onCreateResources(OnCreateResourcesCallback pOnCreateResourcesCallback) throws Exception {
-		Log.i("AAAA", "onCreateResources");
+		Log.i(TAG, "onCreateResources");
 		pOnCreateResourcesCallback.onCreateResourcesFinished();
 	}
 
 	@Override
 	public void onCreateScene(OnCreateSceneCallback pOnCreateSceneCallback) throws Exception {
-		Log.i("AAAA", "onCreateScene");
-		final Scene scene = new Scene(1);
+		Log.i(TAG, "onCreateScene");
+		final Scene scene = new Scene();
 		IBackground b = new Background(1, 0, 0);
 		scene.setBackground(b);
 		pOnCreateSceneCallback.onCreateSceneFinished(scene);
@@ -42,7 +42,7 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements Sh
 
 	@Override
 	public void onPopulateScene(Scene pScene, OnPopulateSceneCallback pOnPopulateSceneCallback) throws Exception {
-		Log.i("AAAA", "onPopulateScene");
+		Log.i(TAG, "onPopulateScene");
 		pOnPopulateSceneCallback.onPopulateSceneFinished();
 	}
 
