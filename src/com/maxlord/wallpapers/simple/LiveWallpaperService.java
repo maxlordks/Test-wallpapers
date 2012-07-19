@@ -117,7 +117,7 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements Sh
 	private void updateSpritePosition() {
 		float width;
 		float height;
-		if (canFillWidth(camera.getWidth(), camera.getHeight(), this.mFaceTextureRegion.getWidth(), this.mFaceTextureRegion.getHeight())) {
+		if (!canFillWidth(camera.getWidth(), camera.getHeight(), this.mFaceTextureRegion.getWidth(), this.mFaceTextureRegion.getHeight())) {
 			width = camera.getWidth();
 			height = (int) (this.mFaceTextureRegion.getHeight() * width / this.mFaceTextureRegion.getWidth());
 			Debug.i("Fill width");
