@@ -3,7 +3,7 @@ package com.maxlord.wallpapers.simple;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.andengine.engine.camera.Camera;
+import org.andengine.engine.camera.SmoothCamera;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
@@ -33,7 +33,7 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements Sh
 	private ScreenOrientation mScreenOrientation = ScreenOrientation.LANDSCAPE_FIXED;
 	private static final int IMAGE_WIDTH = 1600;
 	private static final int IMAGE_HEIGHT = 1200;
-	private Camera camera;
+	private SmoothCamera camera;
 	private ITexture mTexture;
 	private ITextureRegion mFaceTextureRegion;
 
@@ -50,14 +50,12 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements Sh
 		int rotation = display.getRotation();
 		if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) {
 			mScreenOrientation = ScreenOrientation.LANDSCAPE_FIXED;
-			this.camera = new Camera(0, (IMAGE_HEIGHT - mCameraHeight) / 2, mCameraWidth, mCameraHeight);
-			ratio = new RatioResolutionPolicy(IMAGE_WIDTH, IMAGE_HEIGHT);
 		} else {
 			mScreenOrientation = ScreenOrientation.PORTRAIT_FIXED;
-			this.camera = new Camera((IMAGE_WIDTH - mCameraWidth) / 2, 0, mCameraWidth, mCameraHeight);
-			ratio = new RatioResolutionPolicy(IMAGE_WIDTH, IMAGE_HEIGHT);
 		}
-		camera.setCenter(IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
+		ratio = new RatioResolutionPolicy(IMAGE_WIDTH, IMAGE_HEIGHT);
+		this.camera = new SmoothCamera(0, 0, mCameraWidth, mCameraHeight, 10, 10, 0.5f);
+		camera.setCenterDirect(IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
 		camera.setResizeOnSurfaceSizeChanged(true);
 		return new EngineOptions(true, this.mScreenOrientation, ratio, camera);
 	}
@@ -75,6 +73,7 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements Sh
 
 			this.mTexture.load();
 			this.mFaceTextureRegion = TextureRegionFactory.extractFromTexture(this.mTexture);
+			updateScale();
 		} catch (IOException e) {
 			Debug.e(e);
 		}
@@ -89,13 +88,16 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements Sh
 		scene = new Scene();
 		scene.setBackground(new Background(0.09804f, 0.6274f, 0.8784f));
 		backgroundSprite = new Sprite(0, 0, this.mFaceTextureRegion, this.getVertexBufferObjectManager());
-		updateSpritePosition();
 		scene.attachChild(backgroundSprite);
+		//lines();
+		pOnCreateSceneCallback.onCreateSceneFinished(scene);
+	}
+
+	private void lines() {
 		final Line line = new Line(0, 624, IMAGE_WIDTH, 624, 5, this.getVertexBufferObjectManager());
 		scene.attachChild(line);
 		final Line line2 = new Line(0, 721, IMAGE_WIDTH, 721, 10, this.getVertexBufferObjectManager());
 		scene.attachChild(line2);
-		pOnCreateSceneCallback.onCreateSceneFinished(scene);
 	}
 
 	@Override
@@ -113,33 +115,22 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements Sh
 	@Override
 	public void onSurfaceChanged(org.andengine.opengl.util.GLState pGLState, int pWidth, int pHeight) {
 		super.onSurfaceChanged(pGLState, pWidth, pHeight);
-		updateSpritePosition();
+		updateScale();
 		Debug.i(String.format("Camera surface position: %d, %d; size %d, %d", camera.getSurfaceX(), camera.getSurfaceY(), camera.getSurfaceWidth(),
 				camera.getSurfaceHeight()));
 		Debug.i(String.format("Camera xmin max: %f, %f; ymin, max %f, %f", camera.getXMin(), camera.getXMax(), camera.getYMin(), camera.getYMax()));
 	}
 
-	private void updateSpritePosition() {
-		float width;
-		float height;
-		if (!canFillWidth(camera.getWidth(), camera.getHeight(), this.mFaceTextureRegion.getWidth(), this.mFaceTextureRegion.getHeight())) {
-			width = camera.getWidth();
-			height = (int) (this.mFaceTextureRegion.getHeight() * width / this.mFaceTextureRegion.getWidth());
-			Debug.i("Fill width");
+	private void updateScale() {
+		float scale = 1;
+		if (!canFillWidth(camera.getWidth(), camera.getHeight(), IMAGE_WIDTH, IMAGE_HEIGHT)) {
+			scale = camera.getWidthRaw() / IMAGE_WIDTH;
+			Debug.i("Fill width, scale = " + scale);
 		} else {
-			height = camera.getHeight();
-			width = (int) (this.mFaceTextureRegion.getWidth() * height / this.mFaceTextureRegion.getHeight());
-			Debug.i("Fill height");
+			scale = camera.getHeightRaw() / IMAGE_HEIGHT;
+			Debug.i("Fill height, scale = " + scale);
 		}
-		Debug.i(String.format("Sprite size %f, %f", width, height));
-		// backgroundSprite.setSize(width, height);
-		float centerX = camera.getCenterX() - backgroundSprite.getWidth() / 2;
-		float centerY = camera.getCenterY() - backgroundSprite.getHeight() / 2;
-		centerX = 0;
-		centerY = 0;
-		Debug.i(String.format("CenterX, centerY %f, %f, size: %f, %f", centerX, centerY, camera.getWidth(), camera.getHeight()));
-		backgroundSprite.setPosition(centerX, centerY);
-
+		camera.setZoomFactorDirect(scale);
 	}
 
 	private boolean canFillWidth(float containerW, float containerH, float w, float h) {
