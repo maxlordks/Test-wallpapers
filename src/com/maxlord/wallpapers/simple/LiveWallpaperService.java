@@ -10,13 +10,21 @@ import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.primitive.Line;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
+import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.util.FPSLogger;
 import org.andengine.extension.ui.livewallpaper.BaseLiveWallpaperService;
 import org.andengine.opengl.texture.ITexture;
+import org.andengine.opengl.texture.TextureOptions;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
+import org.andengine.opengl.texture.atlas.bitmap.BuildableBitmapTextureAtlas;
+import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
+import org.andengine.opengl.texture.atlas.buildable.builder.BlackPawnTextureAtlasBuilder;
 import org.andengine.opengl.texture.bitmap.BitmapTexture;
 import org.andengine.opengl.texture.region.ITextureRegion;
 import org.andengine.opengl.texture.region.TextureRegionFactory;
+import org.andengine.opengl.texture.region.TiledTextureRegion;
 import org.andengine.util.adt.io.in.IInputStreamOpener;
 import org.andengine.util.debug.Debug;
 
@@ -35,7 +43,9 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements Sh
 	private static final int IMAGE_HEIGHT = 1200;
 	private SmoothCamera camera;
 	private ITexture mTexture;
-	private ITextureRegion mFaceTextureRegion;
+	private ITextureRegion mBackgroundTextureRegion;
+	private BuildableBitmapTextureAtlas mBitmapTextureAtlas;
+	private TiledTextureRegion mStarTextureRegion;
 
 	private Scene scene;
 
@@ -63,16 +73,20 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements Sh
 	@Override
 	public void onCreateResources(OnCreateResourcesCallback pOnCreateResourcesCallback) throws Exception {
 		Log.i(TAG, "onCreateResources");
+		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/");
 		try {
+			this.mBitmapTextureAtlas = new BuildableBitmapTextureAtlas(this.getTextureManager(), 512, 256, TextureOptions.NEAREST);
 			this.mTexture = new BitmapTexture(this.getTextureManager(), new IInputStreamOpener() {
 				@Override
 				public InputStream open() throws IOException {
 					return getAssets().open("gfx/space.jpg");
 				}
 			});
-
+			this.mStarTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mBitmapTextureAtlas, this, "star.png", 2, 1);
+			this.mBitmapTextureAtlas.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 0, 1));
+			this.mBitmapTextureAtlas.load();
 			this.mTexture.load();
-			this.mFaceTextureRegion = TextureRegionFactory.extractFromTexture(this.mTexture);
+			this.mBackgroundTextureRegion = TextureRegionFactory.extractFromTexture(this.mTexture);
 			updateScale();
 		} catch (IOException e) {
 			Debug.e(e);
@@ -87,8 +101,11 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements Sh
 		this.mEngine.registerUpdateHandler(new FPSLogger());
 		scene = new Scene();
 		scene.setBackground(new Background(0.09804f, 0.6274f, 0.8784f));
-		backgroundSprite = new Sprite(0, 0, this.mFaceTextureRegion, this.getVertexBufferObjectManager());
+		backgroundSprite = new Sprite(0, 0, this.mBackgroundTextureRegion, this.getVertexBufferObjectManager());
 		scene.attachChild(backgroundSprite);
+		AnimatedSprite star = new AnimatedSprite(100, 50, this.mStarTextureRegion, this.getVertexBufferObjectManager());
+		star.animate(100);
+		scene.attachChild(star);
 		//lines();
 		pOnCreateSceneCallback.onCreateSceneFinished(scene);
 	}
