@@ -6,7 +6,7 @@ import java.io.InputStream;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
-import org.andengine.engine.options.resolutionpolicy.FillResolutionPolicy;
+import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.primitive.Line;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
@@ -20,24 +20,22 @@ import org.andengine.opengl.texture.region.TextureRegionFactory;
 import org.andengine.util.adt.io.in.IInputStreamOpener;
 import org.andengine.util.debug.Debug;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.Display;
+import android.view.Surface;
 import android.view.WindowManager;
 
 public class LiveWallpaperService extends BaseLiveWallpaperService implements SharedPreferences.OnSharedPreferenceChangeListener {
 	private final String TAG = "LiveWallpaperService";
 
 	public static final String SHARED_PREFS_NAME = "LiveWallpaperPreferences";
-	private ScreenOrientation mScreenOrientation = ScreenOrientation.LANDSCAPE_SENSOR;
+	private ScreenOrientation mScreenOrientation = ScreenOrientation.LANDSCAPE_FIXED;
+	private static final int IMAGE_WIDTH = 1600;
+	private static final int IMAGE_HEIGHT = 1200;
 	private Camera camera;
-	private final static int IMAGE_WIDTH = 1600;
-	private final static int IMAGE_HEIGHT = 1200;
 	private ITexture mTexture;
 	private ITextureRegion mFaceTextureRegion;
-
-	private WindowManager window;
 
 	private Scene scene;
 
@@ -45,10 +43,22 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements Sh
 
 	@Override
 	public EngineOptions onCreateEngineOptions() {
-		window = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-		camera = new Camera(0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
+		Display display = ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
+		int mCameraWidth = display.getWidth();
+		int mCameraHeight = display.getHeight();
+		RatioResolutionPolicy ratio;
+		int rotation = display.getRotation();
+		if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) {
+			mScreenOrientation = ScreenOrientation.LANDSCAPE_FIXED;
+			this.camera = new Camera(0, 0, mCameraWidth, mCameraHeight);
+			ratio = new RatioResolutionPolicy(mCameraHeight, mCameraWidth);
+		} else {
+			mScreenOrientation = ScreenOrientation.PORTRAIT_FIXED;
+			this.camera = new Camera(0, 0, mCameraWidth, mCameraHeight);
+			ratio = new RatioResolutionPolicy(mCameraWidth, mCameraHeight);
+		}
 		camera.setResizeOnSurfaceSizeChanged(true);
-		return new EngineOptions(true, this.mScreenOrientation, new FillResolutionPolicy(), camera);
+		return new EngineOptions(true, this.mScreenOrientation, ratio, camera);
 	}
 
 	@Override
@@ -58,7 +68,7 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements Sh
 			this.mTexture = new BitmapTexture(this.getTextureManager(), new IInputStreamOpener() {
 				@Override
 				public InputStream open() throws IOException {
-					return getAssets().open("gfx/wallpaper_1.jpg");
+					return getAssets().open("gfx/space.jpg");
 				}
 			});
 
@@ -75,20 +85,14 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements Sh
 	public void onCreateScene(OnCreateSceneCallback pOnCreateSceneCallback) throws Exception {
 		Log.i(TAG, "onCreateScene");
 		this.mEngine.registerUpdateHandler(new FPSLogger());
-
 		scene = new Scene();
 		scene.setBackground(new Background(0.09804f, 0.6274f, 0.8784f));
-
-		/*
-		 * Calculate the coordinates for the face, so its centered on the
-		 * camera.
-		 */
 		backgroundSprite = new Sprite(0, 0, this.mFaceTextureRegion, this.getVertexBufferObjectManager());
 		updateSpritePosition();
 		scene.attachChild(backgroundSprite);
-		final Line line = new Line(0, 0, IMAGE_WIDTH, IMAGE_HEIGHT, 5, this.getVertexBufferObjectManager());
+		final Line line = new Line(0, 624, camera.getWidth(), 624, 5, this.getVertexBufferObjectManager());
 		scene.attachChild(line);
-		final Line line2 = new Line(IMAGE_WIDTH, 0, 0, IMAGE_HEIGHT, 10, this.getVertexBufferObjectManager());
+		final Line line2 = new Line(0, 721, camera.getWidth(), 721, 10, this.getVertexBufferObjectManager());
 		scene.attachChild(line2);
 		pOnCreateSceneCallback.onCreateSceneFinished(scene);
 	}
