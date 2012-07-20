@@ -2,6 +2,9 @@ package com.maxlord.wallpapers.simple;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import org.andengine.engine.camera.SmoothCamera;
 import org.andengine.engine.options.EngineOptions;
@@ -41,11 +44,15 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements Sh
 	private ScreenOrientation mScreenOrientation = ScreenOrientation.LANDSCAPE_FIXED;
 	private static final int IMAGE_WIDTH = 1600;
 	private static final int IMAGE_HEIGHT = 1200;
+	private static final int MAX_STARS = 8;
+	private static final long RANDOM_SEED = 1234567890;
 	private SmoothCamera camera;
 	private ITexture mTexture;
 	private ITextureRegion mBackgroundTextureRegion;
 	private BuildableBitmapTextureAtlas mBitmapTextureAtlas;
 	private TiledTextureRegion mStarTextureRegion;
+	private List<TiledTextureRegion> stars = new ArrayList<TiledTextureRegion>(MAX_STARS);
+	final Random random = new Random(RANDOM_SEED);
 
 	private Scene scene;
 
@@ -103,11 +110,19 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements Sh
 		scene.setBackground(new Background(0.09804f, 0.6274f, 0.8784f));
 		backgroundSprite = new Sprite(0, 0, this.mBackgroundTextureRegion, this.getVertexBufferObjectManager());
 		scene.attachChild(backgroundSprite);
-		AnimatedSprite star = new AnimatedSprite(100, 50, this.mStarTextureRegion, this.getVertexBufferObjectManager());
-		star.animate(100);
-		scene.attachChild(star);
+		createStars();
 		//lines();
 		pOnCreateSceneCallback.onCreateSceneFinished(scene);
+	}
+
+	private void createStars() {
+		for(int i=0; i< MAX_STARS; i++){
+			float x = random.nextFloat() * IMAGE_WIDTH;
+			float y = random.nextFloat() * IMAGE_HEIGHT;
+			final AnimatedSprite star = new AnimatedSprite(x, y, this.mStarTextureRegion, this.getVertexBufferObjectManager());
+			star.animate(100);
+			scene.attachChild(star);
+		}		
 	}
 
 	private void lines() {
