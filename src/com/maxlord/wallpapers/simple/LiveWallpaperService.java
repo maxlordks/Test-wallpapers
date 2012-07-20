@@ -50,13 +50,14 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements Sh
 		int rotation = display.getRotation();
 		if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) {
 			mScreenOrientation = ScreenOrientation.LANDSCAPE_FIXED;
-			this.camera = new Camera(0, 0, mCameraWidth, mCameraHeight);
-			ratio = new RatioResolutionPolicy(mCameraHeight, mCameraWidth);
+			this.camera = new Camera(0, (IMAGE_HEIGHT - mCameraHeight) / 2, mCameraWidth, mCameraHeight);
+			ratio = new RatioResolutionPolicy(IMAGE_WIDTH, IMAGE_HEIGHT);
 		} else {
 			mScreenOrientation = ScreenOrientation.PORTRAIT_FIXED;
-			this.camera = new Camera(0, 0, mCameraWidth, mCameraHeight);
-			ratio = new RatioResolutionPolicy(mCameraWidth, mCameraHeight);
+			this.camera = new Camera((IMAGE_WIDTH - mCameraWidth) / 2, 0, mCameraWidth, mCameraHeight);
+			ratio = new RatioResolutionPolicy(IMAGE_WIDTH, IMAGE_HEIGHT);
 		}
+		camera.setCenter(IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2);
 		camera.setResizeOnSurfaceSizeChanged(true);
 		return new EngineOptions(true, this.mScreenOrientation, ratio, camera);
 	}
@@ -90,9 +91,9 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements Sh
 		backgroundSprite = new Sprite(0, 0, this.mFaceTextureRegion, this.getVertexBufferObjectManager());
 		updateSpritePosition();
 		scene.attachChild(backgroundSprite);
-		final Line line = new Line(0, 624, camera.getWidth(), 624, 5, this.getVertexBufferObjectManager());
+		final Line line = new Line(0, 624, IMAGE_WIDTH, 624, 5, this.getVertexBufferObjectManager());
 		scene.attachChild(line);
-		final Line line2 = new Line(0, 721, camera.getWidth(), 721, 10, this.getVertexBufferObjectManager());
+		final Line line2 = new Line(0, 721, IMAGE_WIDTH, 721, 10, this.getVertexBufferObjectManager());
 		scene.attachChild(line2);
 		pOnCreateSceneCallback.onCreateSceneFinished(scene);
 	}
@@ -131,9 +132,11 @@ public class LiveWallpaperService extends BaseLiveWallpaperService implements Sh
 			Debug.i("Fill height");
 		}
 		Debug.i(String.format("Sprite size %f, %f", width, height));
-		backgroundSprite.setSize(width, height);
-		final float centerX = camera.getCenterX() - backgroundSprite.getWidth() / 2;
-		final float centerY = camera.getCenterY() - backgroundSprite.getHeight() / 2;
+		// backgroundSprite.setSize(width, height);
+		float centerX = camera.getCenterX() - backgroundSprite.getWidth() / 2;
+		float centerY = camera.getCenterY() - backgroundSprite.getHeight() / 2;
+		centerX = 0;
+		centerY = 0;
 		Debug.i(String.format("CenterX, centerY %f, %f, size: %f, %f", centerX, centerY, camera.getWidth(), camera.getHeight()));
 		backgroundSprite.setPosition(centerX, centerY);
 
