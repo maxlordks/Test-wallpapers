@@ -11,3 +11,6 @@ gdbserver
 local.properties
 .settings
 AndEngineExamples.iml
+.idea
+classes/**
+TestWallpaper.iml
